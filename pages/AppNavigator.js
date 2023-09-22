@@ -8,14 +8,18 @@ import MainPage from './Mainpage';
 import VendorList from './VendorList';
 import ProductDetailScreen from "./ProductDetailsScreen";
 import Introduction from './Introduction';
+import SignIn from './SignIn';
+import SignUp from './SignUp';
 
 const Stack = createNativeStackNavigator();
 
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Introduction">
+      <Stack.Navigator initialRouteName="SignIn">
         <Stack.Screen name="Introduction" component={Introduction} options={{headerShown:false}} />
+        <Stack.Screen name="SignIn" component={SignIn} options={{headerShown:false}} />
+        <Stack.Screen name="SignUp" component={SignUp} options={{headerShown:false}} /> 
         <Stack.Screen name="MainPage" component={MainPage} options={{headerShown:false}} />
         <Stack.Screen name="VendorList" component={VendorList} options={{headerShown:false}} />
         <Stack.Screen name="ProductDetails" component={ProductDetailScreen} options={{headerShown:false}}/>

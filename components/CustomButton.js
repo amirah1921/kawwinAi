@@ -15,13 +15,14 @@ const CustomButton = ({ title, onPress, width, height, backgroundColor }) => {
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    borderRadius: 1,
+    borderRadius: 10, // Adjust border radius as needed
     borderColor: "#000000", // Corrected border color code
     borderWidth: 1, // Border width
     marginTop: 10, // Add spacing between text and buttons
     alignItems: "center", // Center the buttons horizontally
+    justifyContent: "center", // Center the text vertically
     padding: 10, // Add padding to the container
-},
+  },
   buttonTouchable: {
     justifyContent: "center",
     alignItems: "center",
