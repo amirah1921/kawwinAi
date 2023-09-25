@@ -1,405 +1,381 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Modal,
-  Button,
+  Animated,
+  Dimensions,
+  SafeAreaView,
   ScrollView,
   TextInput,
+  Image,
 } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native'; 
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-// Sample data for products
-const products = [
-  { id: 1, name: 'Dry Food 1', category: 'Photography', image: require('../assets/Kawwin.png')},
-  { id: 2, name: 'Dry Food 2', category: 'Registry' },
-  { id: 3, name: 'Wet Food 1', category: 'Caterers' },
-  { id: 4, name: 'Wet Food 2', category: 'Engagement Party' },
-  { id: 5, name: 'Can Beverage 1', category: 'Rehearsal' },
-  { id: 6, name: 'Bottle Beverage 1', category: 'Fashion' },
-  { id: 7, name: 'Powder Beverage 1', category: 'Music' },
+const promotionData = [
+  {
+    id: 1,
+    name: 'FotokahwinXpress',
+    company: 'End Year Promotion',
+    discount: '30% off',
+    imagePath: require('../assets/imgs/vendor1.png'), // Replace with the actual image path
+  },
+  {
+    id: 2,
+    name: 'Kursus Kahwin',
+    company: 'OCT-DEC Sessions',
+    discount: '20% off',
+    imagePath: require('../assets/imgs/vendor2.png'), // Replace with the actual image path
+  },
 ];
 
-const categories = [
-  'All',
-  'Photography',
-  'Caterers',
-  'Rehearsal',
-  'Wedding favors',
-  'Reception',
-  'Engagement Party',
-  'Registry',
-  'Honeymoon',
-  'Music',
-  'Fashion',
+const vendorData = [
+  {
+    id: '1',
+    vendorName: 'Mak Jemah Food & Catering',
+    place: 'Kuala Lumpur',
+    image: require('../assets/imgs/vendor3.png'), // Replace with the actual image path
+  },
+  {
+    id: '2',
+    vendorName: 'Nana Bridal',
+    place: 'Kuala Lumpur',
+    image: require('../assets/imgs/vendor4.png'), // Replace with the actual image path
+  },
+  {
+    id: '3',
+    vendorName: 'The Cakescape',
+    place: 'Kuala Lumpur',
+    image: require('../assets/imgs/vendor5.png'), // Replace with the actual image path
+  },
 ];
 
-const locations = [
-  'All',
-  'Johor',
-  'Kedah',
-  'Kelantan',
-  'Malacca',
-  'Negeri Sembilan',
-  'Pahang',
-  'Penang',
-  'Perak',
-  'Perlis',
-  'Sabah',
-  'Sarawak',
-  'Selangor',
-  'Terengganu',
-];
+const VendorList = ({navigation, route}) => {
+  const [searchTxt, onChangeText] = useState('');
+  const [activeButton, setActiveButton] = useState('Trending');
+  const [isHidden, setIsHidden] = useState(false);
+  const [slideAnimation] = useState(new Animated.Value(0));
+  const screenWidth = Dimensions.get('window').width; // Get the screen width
 
-const prices = ['All', 'Lowest', 'Highest', 'Reasonable'];
-
-const VendorList = ({ navigation, route }) => {
-  const { category } = route.params;
-
-  // Define the data for your boxes (10 entries)
-  const boxesData = [
-    {
-      id: 1,
-      color: 'red',
-      emoji: '😀',
-      title: 'Photography',
-      description: 'Document the celebration through candid photos and formal pictures',
-    },
-    {
-      id: 2,
-      color: 'green',
-      emoji: '😃',
-      title: 'Caterers',
-      description: 'Provide food and drink for a wedding reception',
-    },
-    {
-      id: 3,
-      color: 'blue',
-      emoji: '😄',
-      title: 'Rehearsal',
-      description: 'Where the couple and the most important individuals in their ceremony do a dry run of the actual wedding day',
-    },
-    {
-      id: 4,
-      color: 'orange',
-      emoji: '🙂',
-      title: 'Wedding Favors',
-      description: 'Serve as a thank-you token to your guests and provide a tangible memory of your celebration',
-    },
-    {
-      id: 5,
-      color: 'purple',
-      emoji: '😎',
-      title: 'Reception',
-      description: 'A party usually held after the completion of a marriage ceremony as hospitality for those who have attended the wedding',
-    },
-    {
-      id: 6,
-      color: 'pink',
-      emoji: '🥰',
-      title: 'Engagement Party',
-      description: 'A party to celebrate the engaged couple and their upcoming wedding.',
-    },
-    {
-      id: 7,
-      color: 'brown',
-      emoji: '😊',
-      title: 'Registry',
-      description: 'To help ensure you cover the must-haves, fun-to-haves, and everything between7',
-    },
-    {
-      id: 8,
-      color: 'gray',
-      emoji: '🙃',
-      title: 'Honeymoon',
-      description: 'A holiday spent together by a newly married couple following their wedding day',
-    },
-    {
-      id: 9,
-      color: 'cyan',
-      emoji: '😇',
-      title: 'Music',
-      description: 'It sets the tone of your special day',
-    },
-    {
-      id: 10,
-      color: 'magenta',
-      emoji: '😍',
-      title: 'Fashion',
-      description: 'Signifies the end of singlehood to a new commitment and partnership',
-    },
-  ];
-
-  // Filter products based on the selected category
-  const filteredProducts = products.filter((product) => product.category === category);
-  const [selectedFilters, setSelectedFilters] = useState([]); // Store selected filters
-  const [isFilterVisible, setIsFilterVisible] = useState(false); // State to control the filter popup visibility
-  const [isBurgerMenuVisible, setIsBurgerMenuVisible] = useState(false); // State to control the burger menu visibility
-  const [searchText, setSearchText] = useState(''); // State to store search text
-
-  const uniqueCategories = [...new Set(boxesData.map((box) => box.category))];
-
-  const toggleFilterModal = () => {
-    setIsFilterVisible(!isFilterVisible);
-  };
-
-  const toggleBurgerMenu = () => {
-    setIsBurgerMenuVisible(!isBurgerMenuVisible);
-  };
-
-  const applyFilter = (filter) => {
-    // Check if the filter is already selected, and toggle its selection
-    if (selectedFilters.includes(filter)) {
-      setSelectedFilters(selectedFilters.filter((item) => item !== filter));
-    } else {
-      setSelectedFilters([...selectedFilters, filter]);
-    }
-  };
-  const renderProductCard = ({ item }) => (
-    <TouchableOpacity
-      style={styles.productCard}
-      onPress={() => navigation.navigate('ProductDetails', { product: item })}
-    >
-      <View>
-        <Text style={styles.productName}>{item.name}</Text>
-        <Text style={styles.productCategory}>{item.category}</Text>
-      </View>
-      <Text>Add</Text>
+  const renderCategoryItem = ({item}) => (
+    <TouchableOpacity style={styles.categoryBubble}>
+      <Text style={styles.categoryText}>{item}</Text>
     </TouchableOpacity>
   );
 
-  const filterProductsByAlphabet = () => {
-    return searchText === ''
-      ? products // Return all products if the search text is empty
-      : products.filter((product) =>
-          product.name.toLowerCase().startsWith(searchText.toLowerCase())
-        ); // Filter products by matching the search text with the product names
+  const renderVendorItem = ({item}) => (
+    <View style={styles.vendorItem}>
+    <Image source={item.image} style={styles.vendorImage} />
+    <View style={styles.vendorDetails}>
+    <Text style={styles.vendorName}>{item.vendorName}</Text>
+    <Text style={styles.vendorPlace}>{item.place}</Text>
+    </View>
+
+  </View>
+  );
+  const renderPromotionCards = () => {
+    if (activeButton === 'Trending') {
+      const slideFromLeft = slideAnimation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -screenWidth * promotionData.length],
+      });
+
+      return (
+        <View style={styles.promotionWrapper}>
+          <Text style={styles.titleText}>Promotions</Text>
+          <TouchableOpacity style={styles.viewAllButton}>
+            <Text style={styles.viewAllText}>View All</Text>
+          </TouchableOpacity>
+          <ScrollView
+            horizontal
+            style={styles.promotionContainer}
+            contentContainerStyle={{width: screenWidth * promotionData.length}}>
+            <Animated.View
+              style={[
+                styles.promotionRow,
+                {transform: [{translateX: slideFromLeft}]},
+              ]}>
+              {promotionData.map(item => (
+                <View style={styles.promotionCard} key={item.id}>
+                  <Image
+                    source={item.imagePath} // Use the imagePath property from the promotion object
+                    style={styles.promotionImage}
+                  />
+
+                  <Text style={styles.promotionName}>{item.name}</Text>
+                  <Text style={styles.promotionCompany}>{item.company}</Text>
+                  <Text style={styles.promotionDiscount}>{item.discount}</Text>
+                </View>
+              ))}
+            </Animated.View>
+          </ScrollView>
+        </View>
+      );
+    } else {
+      return null; // Return null to hide the promotion cards for other tabs
+    }
   };
 
-  const renderFilterColumn = (filterType, filterArray) => (
-    <View style={styles.columnContainer}>
-      <View style={styles.column}>
-        <Text style={styles.filterLabel}>{filterType}:</Text>
-        {filterArray.slice(0, Math.ceil(filterArray.length / 2)).map((filter) => (
-          <TouchableOpacity
-            key={filter}
-            onPress={() => applyFilter(filter)}
-            style={[
-              styles.filter,
-              selectedFilters.includes(filter) && styles.selectedFilter,
-            ]}
-          >
-            <Text>{filter}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <View style={styles.column}>
-        {filterArray.slice(Math.ceil(filterArray.length / 2)).map((filter) => (
-          <TouchableOpacity
-            key={filter}
-            onPress={() => applyFilter(filter)}
-            style={[
-              styles.filter,
-              selectedFilters.includes(filter) && styles.selectedFilter,
-            ]}
-          >
-            <Text>{filter}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
-
-  const renderBurgerMenu = () => (
-    <Modal
-      visible={isBurgerMenuVisible}
-      animationType="slide"
-      transparent={true}
-    >
-      <View style={styles.burgerMenuContainer}>
-        <TouchableOpacity
-          style={styles.burgerMenuItem}
-          onPress={() => {
-            setIsBurgerMenuVisible(false);
-            navigation.navigate('MainPage');
-          }}
-        >
-          <Text>Profile</Text>
-          </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.burgerMenuItem}
-          onPress={() => {
-            setIsBurgerMenuVisible(false);
-          }}
-        >
-          <Text>Settings</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.burgerMenuItem}
-          onPress={() => {
-            // Handle Registration logic
-            setIsBurgerMenuVisible(false);
-          }}
-        >
-          <Text>Register</Text>
-        </TouchableOpacity>
-      </View>
-    </Modal>
-  );
+  // useEffect(() => {
+  //   if (activeButton === 'Trending') {
+  //     slideAnimation.setValue(0);
+  //   } else {
+  //     slideAnimation.setValue(0);
+  //   }
+  // }, [activeButton]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search by name..."
-          value={searchText}
-          onChangeText={(text) => setSearchText(text)}
-        />
-        <TouchableOpacity onPress={toggleBurgerMenu}>
-          <Text style={styles.burgerMenuButton}>☰</Text>
-        </TouchableOpacity>
- </View>
-      <TouchableOpacity onPress={toggleFilterModal}>
-        <Text style={styles.filterButton}>🔍</Text>
-      </TouchableOpacity>
-
-      {renderBurgerMenu()}
-
-      <Modal visible={isFilterVisible} animationType="slide">
-        <View style={styles.filterContainer}>
-          <ScrollView>
-            {/* Category Filter */}
-            {renderFilterColumn('Category', categories)}
-
-            {/* Divider Line */}
-            <View style={styles.divider}></View>
-
-            {/* Location Filter */}
-            {renderFilterColumn('Location', locations)}
-
-            {/* Divider Line */}
-            <View style={styles.divider}></View>
-
-            {/* Price Filter */}
-            {renderFilterColumn('Price', prices)}
-          </ScrollView>
-
-          <Button title="Pick Filter" onPress={toggleFilterModal} />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
+        <View style={styles.searchbarContainer}>
+          <Icon
+            name="search"
+            size={30}
+            color="#000000"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search"
+            onChangeText={onChangeText}
+            value={searchTxt}
+          />
         </View>
-      </Modal>
+        <View style={styles.navBarPosition}>
+          <TouchableOpacity
+            style={[
+              styles.containerNavBar,
+              activeButton === 'Trending' && styles.activeButton,
+            ]}
+            onPress={() => {
+              setActiveButton('Trending');
+              // toggleVisibility();
+            }}>
+            <Text
+              style={[
+                styles.textNavbar,
+                activeButton === 'Trending' && styles.activeText,
+              ]}>
+              Trending
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.containerNavBar,
+              activeButton === 'Near Me' && styles.activeButton,
+            ]}
+            onPress={() => setActiveButton('Near Me')}>
+            <Text
+              style={[
+                styles.textNavbar,
+                activeButton === 'Near Me' && styles.activeText,
+              ]}>
+              Near Me
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.containerNavBar,
+              activeButton === 'Popular' && styles.activeButton,
+            ]}
+            onPress={() => setActiveButton('Popular')}>
+            <Text
+              style={[
+                styles.textNavbar,
+                activeButton === 'Popular' && styles.activeText,
+              ]}>
+              Popular
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      <FlatList
-        data={filteredProducts} // Use filtered products here
-        renderItem={renderProductCard}
-        keyExtractor={(item) => item.id.toString()}
-      />
-    </View>
+        {renderPromotionCards()}
+        {activeButton === 'Trending' && (
+          <View style={styles.vendoWrapper}>
+            <Text style={styles.titleText}>Vendors</Text>
+            <TouchableOpacity style={styles.viewAllButton}>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+            <FlatList
+              data={vendorData}
+              keyExtractor={item => item.id.toString()}
+              renderItem={renderVendorItem}
+              style={styles.vendorList}
+              initialNumToRender={3} // Limit the initial rendering to 3 items
+            />
+          </View>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 60,
-    flex: 1,
-    padding: 15,
-  },
-  headerContainer: {
+  container: {flex: 1, backgroundColor: '#171826'},
+  searchbarContainer: {
+    margin: 15,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingRight: 0.5,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  searchIcon: {
+    marginRight: 10,
   },
   searchBar: {
     flex: 1,
-    height: 30,
-    borderColor: 'white',
-    borderWidth: 1,
-    paddingHorizontal: 12,
+    fontSize: 16,
   },
-  burgerMenuButton: {
-    fontSize: 24,
+  categoryContainer: {
+    paddingHorizontal: 10,
+    paddingBottom: 70, // Adjust this value as needed to make space for the navigation bar
+  },
+  categoryBubble: {
+    backgroundColor: '#53578B',
+    borderRadius: 20,
+    padding: 8,
+    margin: 5,
+  },
+  categoryText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  navBarPosition: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+  },
+  containerNavBar: {
+    flex: 1,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  textNavbar: {
+    fontSize: 16,
+    color: '#505487',
+    padding: 15,
+  },
+  activeButton: {
+    borderBottomColor: 'white',
+  },
+  activeText: {
+    color: 'white',
+  },
+  promotionWrapper: {
+    flex: 1,
+    paddingHorizontal: 16,
+    //paddingBottom: 5, // Add padding to create space between "Promotions" and the cards
+  },
+  promotionImage: {
+    height: 100,
+  },
+  titleText: {
+    fontSize: 15,
     fontWeight: 'bold',
-    marginRight: 0.2,
+    color: 'white',
   },
-  filterButton: {
-    marginTop: 10,
+  viewAllButton: {
     marginBottom: 10,
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'blue',
+    alignSelf: 'flex-end',
+    // marginTop: 10, // Adjust as needed
   },
-  filterContainer: {
-    marginTop: 40,
-    flex: 1,
-    padding: 20,
-  },
-  columnContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  column: {
-    flex: 1,
-  },
-  filterLabel: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  filter: {
+  viewAllText: {
     fontSize: 16,
-    marginBottom: 8,
-    borderWidth: 0, // Remove border
+    color: 'white',
   },
-  selectedFilter: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    backgroundColor: 'lightblue',
-  },
-  divider: {
-    borderBottomWidth: 1,
-    borderColor: 'lightgray',
-    marginBottom: 16,
-  },
-  // Styles for burger menu
-  burgerMenuContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  burgerMenuItem: {
-    backgroundColor: 'white',
-    padding: 10,
-    marginVertical: 5,
-    width: 200,
-    alignItems: 'center',
-    borderRadius: 5,
-  },
-  productCard: {
+  promotionRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-    padding: 16,
-    backgroundColor: 'white',
+    width: '100%',
+  },
+  promotionContainer: {
+    flex: 1,
+    paddingHorizontal: 2,
+  },
+  promotionCard: {
+    height: 175,
+    width: Dimensions.get('window').width - 60,
+    // backgroundColor: '#fff',
     borderRadius: 8,
-    elevation: 4,
-    shadowColor: 'rgba(0, 0, 0, 0.2)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    borderWidth: 0, // Remove border
+    marginHorizontal: 8,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 0.5,
+    borderColor: 'white',
   },
-  productName: {
+  promotionName: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: 'white',
   },
-  productCategory: {
+  promotionCompany: {
     fontSize: 16,
+    color: 'white',
+  },
+  promotionDiscount: {
+    fontSize: 16,
+    color: 'yellow',
+  },
+  vendoWrapper: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+
+  vendorCard: {
+    height: 60,
+    borderRadius: 8,
+    marginBottom: 10,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vendorItem: {
+    width: "100%",
+    marginRight: 10, // Add spacing between vendor items
+    flexDirection: 'row', // Arrange image and info in a row
+    alignItems: 'center', // Vertically center items in the row
+    alignSelf: "flex-start",
+    padding: 15,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "white"
+  },
+  vendorImage: {
+    width: 120,
+    height: 80,
+    resizeMode: "cover",
+    borderRadius: 8,
+    
+  },
+  vendorDetails: {
+    marginLeft: 20,
+    flexDirection: "column",
+    alignItems: "center"
+  },
+  vendorInfo: {
+    marginLeft: 10, // Add spacing between image and info
+  },
+  vendorName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+    flexWrap: 'wrap',         // Allow text to wrap to the next line
+    width: 180,              // Set a maximum width for the text container
+    textAlign: 'center',     // Center-align the text
+  },
+  
+  vendorPlace: {
+    fontSize: 14,
+    color: '#59E45E',
   },
 });
 
