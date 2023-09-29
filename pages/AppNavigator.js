@@ -10,13 +10,21 @@ import ProductDetailScreen from "./ProductDetailsScreen";
 import Introduction from './Introduction';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
+import AssistantsScreen from './AssistantsScreen';
+import ChatScreen from './ChatScreen';
+import ToDoScreen from './ToDoScreen';
+import AddToDoScreen from './AddToDoScreen';
 
 const Stack = createNativeStackNavigator();
 
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignIn">
+      <Stack.Navigator initialRouteName="MainPage">
+        <Stack.Screen name=" AddToDoScreen" component={ AddToDoScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="ToDoScreen" component={ToDoScreen} options={{headerShown: false}} />
+        <Stack.Screen name="ChatScreen" component={ChatScreen} options={{headerShown: false}} />
+        <Stack.Screen name="AssistantsScreen" component={AssistantsScreen} options={{headerShown: false}} />
         <Stack.Screen name="Introduction" component={Introduction} options={{headerShown:false}} />
         <Stack.Screen name="SignIn" component={SignIn} options={{headerShown:false}} />
         <Stack.Screen name="SignUp" component={SignUp} options={{headerShown:false}} /> 

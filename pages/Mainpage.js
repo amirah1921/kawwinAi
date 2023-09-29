@@ -1,236 +1,213 @@
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Modal } from 'react-native';
+import React from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Background from '../components/Background';
+import Moment from 'moment';
+
+const data = [
+  { id: '1', text: 'The Event', countdownDate: '2023-12-12T10:00:00',  },
+  { id: '2', text: 'Total Spend', screen: 'Screen2' },
+  { id: '3', text: 'Total Budget', screen: 'Screen3' },
+  { id: '4', text: 'Item 4', screen: 'Screen4' },
+  { id: '5', text: 'Item 5', screen: 'Screen5' },
+  { id: '6', text: 'Item 6', screen: 'Sc`een6' },
+  { id: '7', text: 'Item 7', screen: 'Screen7' },
+  { id: '8', text: 'Item 8', screen: 'Screen8' },
+];
 
 const MainPage = () => {
   const navigation = useNavigation();
-
-  const [isBurgerMenuVisible, setIsBurgerMenuVisible] = useState(false);
-
-  // Define the data for your boxes (10 entries)
+  
   const boxesData = [
     {
       id: 1,
-      emoji: '😀',
-      title: 'Photography',
-      description: 'Document the celebration through candid photos and formal pictures',
+      title: 'Assistants',
+      emoji: '👥',
+      screen: 'AssistantsScreen',
     },
     {
       id: 2,
-      emoji: '😃',
-      title: 'Caterers',
-      description: 'Provide food and drink for a wedding reception',
+      title: 'My Spending',
+      emoji: '💰',
+      screen: 'CaterersScreen',
     },
     {
       id: 3,
-      emoji: '😄',
-      title: 'Rehearsal',
-      description: 'Where the couple and the most important individuals in their ceremony do a dry run of the actual wedding day',
+      title: 'Vendors',
+      emoji: '🛍️',
+      screen: 'RehearsalScreen',
     },
     {
       id: 4,
-      emoji: '🙂',
-      title: 'Wedding Favors',
-      description: 'Serve as a thank-you token to your guests and provide a tangible memory of your celebration',
-    },
-    {
-      id: 5,
-      emoji: '😎',
-      title: 'Reception',
-      description: 'A party usually held after the completion of a marriage ceremony as hospitality for those who have attended the wedding',
-    },
-    {
-      id: 6,
-      emoji: '🥰',
-      title: 'Engagement Party',
-      description: 'A party to celebrate the engaged couple and their upcoming wedding.',
-    },
-    {
-      id: 7,
-      emoji: '😊',
-      title: 'Registry',
-      description: 'To help ensure you cover the must-haves, fun-to-haves, and everything between7',
-    },
-    {
-      id: 8,
-      emoji: '🙃',
-      title: 'Honeymoon',
-      description: 'A holiday spent together by a newly married couple following their wedding day',
-    },
-    {
-      id: 9,
-      emoji: '😇',
-      title: 'Music',
-      description: 'It sets the tone of your special day',
-    },
-    {
-      id: 10,
-      emoji: '😍',
-      title: 'Fashion',
-      description: 'Signifies the end of singlehood to a new commitment and partnership',
+      title: 'To Do List',
+      emoji: '📝',
+      screen: 'ToDoScreen',
     },
   ];
-const handleBoxPress = (boxData) => {
-    navigation.navigate('VendorList', { category: boxData.title });
+
+  const handleBoxPress = (item) => {
+    if (item.screen) {
+      navigation.navigate(item.screen);
+    }
   };
 
-  const toggleBurgerMenu = () => {
-    setIsBurgerMenuVisible(!isBurgerMenuVisible);
-  };
+  const renderItem = ({ item }) => {
+    if (item.countdownDate) {
+      const compareDate = Moment(item.countdownDate);
+      const now = Moment();
+      const duration = Moment.duration(compareDate.diff(now));
+      const formattedCountdown = `${Math.floor(duration.asDays())}d:${duration.hours()}h:${duration.minutes()}m:${duration.seconds()}s`;
 
-  const { width } = Dimensions.get('window');
-  const boxWidth = (width - 40) / 2;
+      const formattedDateTime = Moment(item.countdownDate).format('DD-MM-YYYY h:mm A');
+
+      return (
+        <TouchableOpacity
+          style={styles.item}
+          onPress={() => handleBoxPress(item)}
+        >
+          <Text style={styles.eventText}>{item.text}</Text>
+          <Text style={styles.countdown}>{formattedCountdown}</Text>
+          <Text style={styles.dateTime}>{formattedDateTime}</Text>
+        </TouchableOpacity>
+      );
+    } else {
+      return (
+        <TouchableOpacity
+          style={styles.item}
+          onPress={() => handleBoxPress(item)}
+        >
+          <Text>{item.text}</Text>
+        </TouchableOpacity>
+      );
+    }
+  };
 
   return (
-    <Background>
     <View style={styles.container}>
-      <TouchableOpacity onPress={toggleBurgerMenu} style={styles.burgerButton}>
-        <Text style={styles.burgerButtonText}>☰</Text>
-      </TouchableOpacity>
-
-      <View style={styles.content}>
-        <Image
-          source={require('../assets/Robot.png')}
-          style={styles.characterImage}
-        />
-        <Text style={styles.title}>Welcome to My App</Text>
-
-        <ScrollView contentContainerStyle={styles.boxContainer}>
-          {boxesData.map((box) => (
-            <TouchableOpacity
-              key={box.id}
-              style={styles.box}
-              onPress={() => handleBoxPress(box)}
-            >
-              <View style={[styles.boxContent, { backgroundColor: box.color, width: boxWidth }]}>
-                <Text style={styles.boxEmoji}>{box.emoji}</Text>
-                <Text style={styles.boxTitle}>{box.title}</Text>
-                <Text style={styles.boxDescription}>{box.description}</Text>
+      <Text style={styles.title}>Home</Text>
+      <FlatList
+        horizontal
+        data={data}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        style={styles.flatList} 
+      />
+      <ScrollView contentContainerStyle={styles.boxContainer}>
+        {boxesData.map((box) => (
+          <TouchableOpacity
+            key={box.id}
+            style={styles.box}
+            onPress={() => handleBoxPress(box)}
+          >
+            <View style={styles.boxContent}>
+              <View style={styles.emojiContainer}>
+                <Text style={[styles.boxEmoji, { backgroundColor: '#0066FF', width: 34, height: 34, textAlign: 'center' }]}>{box.emoji}</Text>
               </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      <Modal
-        visible={isBurgerMenuVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={toggleBurgerMenu}
-      >
-        <View style={styles.burgerMenuContainer}>
-          <TouchableOpacity
-            style={styles.burgerMenuItem}
-            onPress={() => {
-              // Handle Profile logic
-              toggleBurgerMenu();
-            }}
-          >
-            <Text>Profile</Text>
+              <Text style={styles.boxText}>{box.title}</Text>
+            </View>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.burgerMenuItem}
-            onPress={() => {
-              // Handle Chat logic
-              toggleBurgerMenu();
-            }}
-          >
-            <Text>Chat</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.burgerMenuItem}
-            onPress={() => {
-              // Handle To-Do List logic
-              toggleBurgerMenu();
-            }}
-          >
-            <Text>To-Do List</Text>
-          </TouchableOpacity>
+        ))}
+        <View style={styles.highlightSection}>
+        <Text style={styles.highlightTitle}>Highlights</Text> 
+          <View style={styles.highlightBox}>
+            <Text style={styles.highlightText}>This is a highlight section below the FlatList.</Text>
+          </View>
         </View>
-      </Modal>
+      </ScrollView>
     </View>
-     </Background>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 10,
-    flex: 1,
-    // backgroundColor: '#fff',
-  },
-  content: {
-    marginTop: 60,
-    flex: 1,
-    alignItems: 'center',
+    backgroundColor: '#2b2e46',
   },
   title: {
-    fontSize: 25, // Set the font size to 20
+    marginTop: 25,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 5,
+    marginLeft: 10,
   },
-  characterImage: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
+  item: {
+    backgroundColor: 'lightgray',
+    borderRadius: 20,
+    height: 100,
+    margin: 10,
+    minWidth: 170,
+    marginBottom: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  eventText: {
+    fontSize: 12,
+    fontFamily: 'CSMedium',
+  },
+  countdown: {
+    marginTop: 25,
+    textAlign: 'center', 
+    justifyContent: 'center', 
+    fontSize: 15,
+    fontFamily: 'CSMedium',
+  },
+  dateTime: {
+    marginTop: 20,
+    fontSize: 12,
+    fontFamily: 'CSMedium',
+    textAlign: 'left',
   },
   boxContainer: {
+    marginTop: 10,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     paddingHorizontal: 10,
   },
   box: {
-    marginBottom: 20,
-    borderColor: 'black',
-    backgroundColor: '#E1E5EC',
-    borderRadius: 8,
+    marginVertical: 5,
   },
   boxContent: {
-    justifyContent: 'center',
+    padding: 15,
+    width: 170,
+    backgroundColor: "#9497ba",
+    borderRadius: 20,
     alignItems: 'center',
-    borderRadius: 10,
-    padding: 10,
+    flexDirection: 'row', 
+  },
+  emojiContainer: {
+    marginRight: 10,
+    justifyContent: 'center', 
+    alignItems: 'center', 
   },
   boxEmoji: {
-    fontSize: 30, // Font size for the emoji
+    fontSize: 20,
+    borderRadius: 30,
   },
-  boxTitle: {
-    fontSize: 16, // Font size for the title
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  boxDescription: {
-    fontSize: 14, // Font size for the description
-    textAlign: 'left',
-  },
-  // Styles for burger button
-  burgerButton: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    margin: 20,
-    zIndex: 1, // Ensure it's above other content
-  },
-  burgerButtonText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  // Styles for burger menu
-  burgerMenuContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  burgerMenuItem: {
-    backgroundColor: 'white',
-    padding: 20,
+  boxText: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: 'white',
     marginVertical: 5,
-    width: 200,
+  },
+  highlightSection: {
+    padding: 10,
     alignItems: 'center',
-    borderRadius: 5,
+  },
+  highlightBox: {
+    backgroundColor: 'lightyellow',
+    borderRadius: 20,
+    padding: 20,
+  },
+  highlightText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  highlightTitle: {
+    fontSize: 17,
+    fontFamily: 'CSMedium',
+    marginBottom: 15,
+    paddingRight: 250,
+    color: 'white',
   },
 });
 
