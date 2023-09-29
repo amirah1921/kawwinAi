@@ -29,8 +29,9 @@ function App() {
         <Stack.Screen name="SignIn" component={SignIn} options={{headerShown:false}} />
         <Stack.Screen name="SignUp" component={SignUp} options={{headerShown:false}} /> 
         <Stack.Screen name="MainPage" component={MainPage} options={{headerShown:false}} />
-        <Stack.Screen name="VendorList" component={VendorList} options={{headerShown:false}} />
+        <Stack.Screen name="VendorList" component={VendorList} options={{headerShown:true}} />
         <Stack.Screen name="ProductDetails" component={ProductDetailScreen} options={{headerShown:false}}/>
+        
       </Stack.Navigator>
     </NavigationContainer>
   );
