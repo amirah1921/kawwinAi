@@ -21,7 +21,7 @@ function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="MainPage">
-        <Stack.Screen name=" AddToDoScreen" component={ AddToDoScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="AddToDoScreen" component={AddToDoScreen} options={{headerShown: false}}/>
         <Stack.Screen name="ToDoScreen" component={ToDoScreen} options={{headerShown: false}} />
         <Stack.Screen name="ChatScreen" component={ChatScreen} options={{headerShown: false}} />
         <Stack.Screen name="AssistantsScreen" component={AssistantsScreen} options={{headerShown: false}} />
