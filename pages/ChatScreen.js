@@ -29,13 +29,13 @@ const ChatScreen = ({ navigation }) => {
                   </View>
                   <View style={styles.chatboxRight}>
                     <Text style={styles.chatText}>Apa kabar mu disana</Text>
+                    <Text style={styles.chatText}>Can you help me searching for a MUA and photography for my wedding event ?</Text>
                   </View>
                 </View>
               </View>
               <View style={styles.inputItem}>
                 <TextInput style={styles.input} placeholder="I need advice" />
                 <TouchableOpacity style={styles.sendButton}>
-                  {/* Add the paper plane icon here */}
                   <Image source={require('../assets/paper-plane.png')} style={styles.sendIcon} />
                 </TouchableOpacity>
               </View>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     paddingRight: 10,
     borderRadius: 15,
-    maxWidth: '70%',
+    maxWidth: '100%',
     marginBottom: 5,
   },
   chatTextLeft: {
@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'CSMedium',
     fontSize: 15,
+    width: 298,
   },
   inputItem: {
     display: 'flex',
